@@ -9,7 +9,7 @@ define([], function() {
             if (parent) {
                 child.prototype = new parent;
                 child.prototype.constructor = child;
-                child.prototype.parent = parent.prototype;
+                child.prototype._super = parent.prototype;
             }
 
             (slotDefs && Object.keys(slotDefs) || []).forEach(addSlot);

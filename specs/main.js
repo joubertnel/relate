@@ -30,7 +30,7 @@ describe('main', function() {
                 expect(o).to.be.instanceof(oop.CoreObject);
             });
 
-            it('can accept a map of initial property values', function() {
+            it('can accept a map of initial key/values that get set on the instance', function() {
                 var technology = 'JavaScript';
                 var domain = 'Everywhere';
                 var expected = [technology, domain];
@@ -59,29 +59,30 @@ describe('main', function() {
             expect(Child.prototype.constructor).to.equal(Child);
         });
 
-        it('adds a parent property that can be used to refer to the parent (for calling "super" methods)', function() {
-            oop.derive(Parent, Child);
-            expect(Child.prototype.parent).to.equal(Parent.prototype);
-        });
-
-        it('adds properties with values to the child prototype', function() {
+        it('adds methods to the child that can invoke methods on the parent (i.e. super functionality)', function() {
             var child;
+            Parent.prototype.grow = function() { return 'parentDidGrow'; };
+            
             oop.derive(Parent, Child, {
-                language: 'JavaScript'
-            });
-
-            child = new Child();
-            expect(child.language).to.equal('JavaScript');
-        });
-
-        it('adds methods to the child (prototype)', function() {
-            var child;
-            oop.derive(Parent, Child, {
-                grow: function() { return 'didGrow'; }
+                grow: function() {
+                    var result = 'childDidGrow ' + this._super.grow();
+                    return result;
+                }
             });
 
             child = new Child;
-            expect(child.grow()).to.equal('didGrow');
+
+            expect(child.grow()).to.equal('childDidGrow parentDidGrow');
+        });
+
+        it('adds properties to the child', function() {
+            var child;
+            oop.derive(Parent, Child, {
+                'invokePattern': 'async'
+            });
+
+            child = new Child;
+            expect(child.invokePattern).to.equal('async');            
         });
     });
     
