@@ -1,4 +1,4 @@
-/*globals require, describe, it, expect, before, beforeEach */
+/*globals require, describe, it, expect, before, beforeEach, afterEach */
 
 
 var requirejs = require('requirejs');
@@ -12,6 +12,8 @@ requirejs.config({
 describe('main', function() {
 
     var oop;
+    var actual, expected;
+    var obj;
 
     // Importing the OOP library using RequireJS is asynchronous.
     // So we wait for it to be imported and then continue. 
@@ -26,24 +28,125 @@ describe('main', function() {
 
         describe('the constructor', function() {
             it('creates an instance of CoreObject', function() {
-                var o = new oop.CoreObject;
-                expect(o).to.be.instanceof(oop.CoreObject);
+                obj = new oop.CoreObject;
+                expect(obj).to.be.instanceof(oop.CoreObject);
             });
 
             it('can accept a map of initial key/values that get set on the instance', function() {
                 var technology = 'JavaScript';
                 var domain = 'Everywhere';
-                var expected = [technology, domain];
-                var o = new oop.CoreObject({
+                obj = new oop.CoreObject({
                     technology: technology,
                     domain: domain
                 });
-                var actual = [o.technology, o.domain];
+                
+                expected = [technology, domain];
+                actual = [obj.technology, obj.domain];
+
+                expect(actual).to.deep.equal(expected);
+            });
+        });
+
+
+    });
+
+    describe('target/action (safe method invocation)', function() {
+
+        var target, anotherTarget;
+
+        beforeEach(function() {
+            target = {
+                doSomething: function() { arguments[0].push('didDoSomething'); }
+            };
+            
+            anotherTarget = {
+                doSomething: function() { arguments[0].push('didDoSomethingOnObj2'); }
+            };
+        });
+
+        describe('try', function() {
+            it('fails silently if the the target does not exist', function() {
+                var target = undefined;
+                var actual = 'something';
+                actual = oop.try('singAndDance', target);
+                expect(actual).to.be.undefined;
+            });
+            
+            if('invokes an action if an only if a method by that name exists on the target', function() {
+                expected = ['didDoSomething'];
+                actual = [];
+
+                oop.try('doSomething', target, [actual]);
+
+                expect(actual).to.equal(expected);
+            });
+        });
+
+        describe('tryOnce', function() {
+            it('fails silently if the target does not exist', function() {
+                var target = undefined;
+                var action = 'something';
+                action = oop.tryOnce('singAndDance', target);
+                expect(action).to.be.undefined;
+            });
+            it('only invokes action on a target if it has not been done before by tryOnce', function() {
+                expected = ['didDoSomething'];
+                actual = [];
+
+                oop.tryOnce('doSomething', target, [actual]);
+                oop.tryOnce('doSomething', target, [actual]);
+
+                expect(actual).to.deep.equal(expected);
+            });
+
+            it('will invoke the same action on different targets', function() {
+                expected = ['didDoSomething', 'didDoSomethingOnObj2'];
+                actual = [];
+
+                oop.tryOnce('doSomething', target, [actual]);
+                oop.tryOnce('doSomething', anotherTarget, [actual]);
+
+                expect(actual).to.deep.equal(expected);
+            });
+        });
+
+        describe('forgetTryHistory', function() {
+            it('fails silently if the target does not exist', function() {
+                var target = undefined;
+                var actual = 'something';
+                actual = oop.forgetTryHistory(target);
+                expect(actual).to.be.undefined;
+            });
+            
+            it('fails silently if there is no "try history"', function() {
+                var target = {};
+                var actual = 'something';
+                actual = oop.forgetTryHistory(target);
+                expect(actual).to.be.undefined;
+            });
+            
+            it('clears the invoke history on a target so that tryOnce can fire a previously fired action again', function() {
+                var target = {
+                    doSomething: function(arr, index) {
+                        arr.push(['didDoSomething', index]);
+                    }
+                };
+                
+                expected = [['didDoSomething', 0],
+                            ['didDoSomething', 2]];
+                actual = [];
+
+                oop.tryOnce('doSomething', target, [actual, 0]);
+                oop.tryOnce('doSomething', target, [actual, 1]);
+                oop.forgetTryHistory(target);
+                oop.tryOnce('doSomething', target, [actual, 2]);
+
                 expect(actual).to.deep.equal(expected);
             });
         });
 
     });
+
 
     describe('derive', function() {
         var Parent, Child;

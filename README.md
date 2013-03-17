@@ -2,6 +2,10 @@
    - [main](#main)
      - [CoreObject](#main-coreobject)
        - [the constructor](#main-coreobject-the-constructor)
+     - [target/action (safe method invocation)](#main-targetaction-safe-method-invocation)
+       - [try](#main-targetaction-safe-method-invocation-try)
+       - [tryOnce](#main-targetaction-safe-method-invocation-tryonce)
+       - [forgetTryHistory](#main-targetaction-safe-method-invocation-forgettryhistory)
      - [derive](#main-derive)
 <a name=""></a>
  
@@ -14,8 +18,8 @@
 creates an instance of CoreObject.
 
 ```js
-var o = new oop.CoreObject;
-expect(o).to.be.instanceof(oop.CoreObject);
+obj = new oop.CoreObject;
+expect(obj).to.be.instanceof(oop.CoreObject);
 ```
 
 can accept a map of initial key/values that get set on the instance.
@@ -23,12 +27,103 @@ can accept a map of initial key/values that get set on the instance.
 ```js
 var technology = 'JavaScript';
 var domain = 'Everywhere';
-var expected = [technology, domain];
-var o = new oop.CoreObject({
+obj = new oop.CoreObject({
     technology: technology,
     domain: domain
 });
-var actual = [o.technology, o.domain];
+
+expected = [technology, domain];
+actual = [obj.technology, obj.domain];
+
+expect(actual).to.deep.equal(expected);
+```
+
+<a name="main-targetaction-safe-method-invocation"></a>
+## target/action (safe method invocation)
+<a name="main-targetaction-safe-method-invocation-try"></a>
+### try
+fails silently if the the target does not exist.
+
+```js
+var target = undefined;
+var actual = 'something';
+actual = oop.try('singAndDance', target);
+expect(actual).to.be.undefined;
+```
+
+<a name="main-targetaction-safe-method-invocation-tryonce"></a>
+### tryOnce
+fails silently if the target does not exist.
+
+```js
+var target = undefined;
+var action = 'something';
+action = oop.tryOnce('singAndDance', target);
+expect(action).to.be.undefined;
+```
+
+only invokes action on a target if it has not been done before by tryOnce.
+
+```js
+expected = ['didDoSomething'];
+actual = [];
+
+oop.tryOnce('doSomething', target, [actual]);
+oop.tryOnce('doSomething', target, [actual]);
+
+expect(actual).to.deep.equal(expected);
+```
+
+will invoke the same action on different targets.
+
+```js
+expected = ['didDoSomething', 'didDoSomethingOnObj2'];
+actual = [];
+
+oop.tryOnce('doSomething', target, [actual]);
+oop.tryOnce('doSomething', anotherTarget, [actual]);
+
+expect(actual).to.deep.equal(expected);
+```
+
+<a name="main-targetaction-safe-method-invocation-forgettryhistory"></a>
+### forgetTryHistory
+fails silently if the target does not exist.
+
+```js
+var target = undefined;
+var actual = 'something';
+actual = oop.forgetTryHistory(target);
+expect(actual).to.be.undefined;
+```
+
+fails silently if there is no "try history".
+
+```js
+var target = {};
+var actual = 'something';
+actual = oop.forgetTryHistory(target);
+expect(actual).to.be.undefined;
+```
+
+clears the invoke history on a target so that tryOnce can fire a previously fired action again.
+
+```js
+var target = {
+    doSomething: function(arr, index) {
+        arr.push(['didDoSomething', index]);
+    }
+};
+
+expected = [['didDoSomething', 0],
+            ['didDoSomething', 2]];
+actual = [];
+
+oop.tryOnce('doSomething', target, [actual, 0]);
+oop.tryOnce('doSomething', target, [actual, 1]);
+oop.forgetTryHistory(target);
+oop.tryOnce('doSomething', target, [actual, 2]);
+
 expect(actual).to.deep.equal(expected);
 ```
 

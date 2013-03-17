@@ -1,6 +1,8 @@
 /*globals define */
 
 define([], function() {
+    var _invokeHistoryKey = '__oop.InvokeHistory__' + Date.now();
+    
     var derive = function(parent, child, slotDefs) {
             var addSlot = function(name) {
                 child.prototype[name] = slotDefs[name];
@@ -14,6 +16,38 @@ define([], function() {
 
             (slotDefs && Object.keys(slotDefs) || []).forEach(addSlot);
     };
+
+    var tryAction = function(action, target, args) {
+        var targetAction = target && target[action];
+        return targetAction ? targetAction.apply(target, args) : undefined;
+    };
+
+    var tryActionOnce = function(action, target, args) {
+        var actionsTakenOnTarget;
+        var result;
+
+        if (target) {
+            actionsTakenOnTarget = target[_invokeHistoryKey];
+            if (!actionsTakenOnTarget) {
+                actionsTakenOnTarget = target[_invokeHistoryKey] = {};
+            }
+
+            if (!actionsTakenOnTarget[action]) {
+                actionsTakenOnTarget[action] = true;
+                result = tryAction(action, target, args);
+            }
+        }
+
+        return result;
+    };
+
+    var forgetTryHistory = function(target) {
+        var hasHistory = target && target[_invokeHistoryKey];
+        if (hasHistory) {
+            target[_invokeHistoryKey] = {};
+        }
+    };
+
 
     var CoreObject = function(slots) {
         if (slots) {
@@ -41,6 +75,9 @@ define([], function() {
 
     return {
         CoreObject: CoreObject,
-        derive: derive
+        derive: derive,
+        try: tryAction,
+        tryOnce: tryActionOnce,
+        forgetTryHistory: forgetTryHistory
     };
 });
