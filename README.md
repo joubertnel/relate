@@ -51,6 +51,17 @@ actual = oop.try('singAndDance', target);
 expect(actual).to.be.undefined;
 ```
 
+invokes an action if an only if a method by that name exists on the target.
+
+```js
+expected = ['didDoSomething'];
+actual = [];
+
+oop.try('doSomething', target, [actual]);
+
+expect(actual).to.deep.equal(expected);
+```
+
 <a name="main-targetaction-safe-method-invocation-tryonce"></a>
 ### tryOnce
 fails silently if the target does not exist.

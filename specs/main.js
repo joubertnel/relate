@@ -72,13 +72,13 @@ describe('main', function() {
                 expect(actual).to.be.undefined;
             });
             
-            if('invokes an action if an only if a method by that name exists on the target', function() {
+            it('invokes an action if an only if a method by that name exists on the target', function() {
                 expected = ['didDoSomething'];
                 actual = [];
 
                 oop.try('doSomething', target, [actual]);
 
-                expect(actual).to.equal(expected);
+                expect(actual).to.deep.equal(expected);
             });
         });
 
