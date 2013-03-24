@@ -18,8 +18,8 @@
 creates an instance of CoreObject.
 
 ```js
-obj = new oop.CoreObject;
-expect(obj).to.be.instanceof(oop.CoreObject);
+obj = new rel.CoreObject;
+expect(obj).to.be.instanceof(rel.CoreObject);
 ```
 
 can accept a map of initial key/values that get set on the instance.
@@ -27,7 +27,7 @@ can accept a map of initial key/values that get set on the instance.
 ```js
 var technology = 'JavaScript';
 var domain = 'Everywhere';
-obj = new oop.CoreObject({
+obj = new rel.CoreObject({
     technology: technology,
     domain: domain
 });
@@ -47,7 +47,7 @@ fails silently if the the target does not exist.
 ```js
 var target = undefined;
 var actual = 'something';
-actual = oop.try('singAndDance', target);
+actual = rel.try('singAndDance', target);
 expect(actual).to.be.undefined;
 ```
 
@@ -57,7 +57,7 @@ invokes an action if an only if a method by that name exists on the target.
 expected = ['didDoSomething'];
 actual = [];
 
-oop.try('doSomething', target, [actual]);
+rel.try('doSomething', target, [actual]);
 
 expect(actual).to.deep.equal(expected);
 ```
@@ -69,7 +69,7 @@ fails silently if the target does not exist.
 ```js
 var target = undefined;
 var action = 'something';
-action = oop.tryOnce('singAndDance', target);
+action = rel.tryOnce('singAndDance', target);
 expect(action).to.be.undefined;
 ```
 
@@ -79,8 +79,8 @@ only invokes action on a target if it has not been done before by tryOnce.
 expected = ['didDoSomething'];
 actual = [];
 
-oop.tryOnce('doSomething', target, [actual]);
-oop.tryOnce('doSomething', target, [actual]);
+rel.tryOnce('doSomething', target, [actual]);
+rel.tryOnce('doSomething', target, [actual]);
 
 expect(actual).to.deep.equal(expected);
 ```
@@ -91,8 +91,8 @@ will invoke the same action on different targets.
 expected = ['didDoSomething', 'didDoSomethingOnObj2'];
 actual = [];
 
-oop.tryOnce('doSomething', target, [actual]);
-oop.tryOnce('doSomething', anotherTarget, [actual]);
+rel.tryOnce('doSomething', target, [actual]);
+rel.tryOnce('doSomething', anotherTarget, [actual]);
 
 expect(actual).to.deep.equal(expected);
 ```
@@ -104,7 +104,7 @@ fails silently if the target does not exist.
 ```js
 var target = undefined;
 var actual = 'something';
-actual = oop.forgetTryHistory(target);
+actual = rel.forgetTryHistory(target);
 expect(actual).to.be.undefined;
 ```
 
@@ -113,7 +113,7 @@ fails silently if there is no "try history".
 ```js
 var target = {};
 var actual = 'something';
-actual = oop.forgetTryHistory(target);
+actual = rel.forgetTryHistory(target);
 expect(actual).to.be.undefined;
 ```
 
@@ -130,10 +130,10 @@ expected = [['didDoSomething', 0],
             ['didDoSomething', 2]];
 actual = [];
 
-oop.tryOnce('doSomething', target, [actual, 0]);
-oop.tryOnce('doSomething', target, [actual, 1]);
-oop.forgetTryHistory(target);
-oop.tryOnce('doSomething', target, [actual, 2]);
+rel.tryOnce('doSomething', target, [actual, 0]);
+rel.tryOnce('doSomething', target, [actual, 1]);
+rel.forgetTryHistory(target);
+rel.tryOnce('doSomething', target, [actual, 2]);
 
 expect(actual).to.deep.equal(expected);
 ```
@@ -143,7 +143,7 @@ expect(actual).to.deep.equal(expected);
 sets up a prototypal chain between parent and child.
 
 ```js
-oop.derive(Parent, Child);
+rel.derive(Parent, Child);
 expect(Child.prototype).to.be.an.instanceof(Parent);
 expect(Child.prototype.constructor).to.equal(Child);
 ```
@@ -154,7 +154,7 @@ adds methods to the child that can invoke methods on the parent (i.e. super func
 var child;
 Parent.prototype.grow = function() { return 'parentDidGrow'; };
 
-oop.derive(Parent, Child, {
+rel.derive(Parent, Child, {
     grow: function() {
         var result = 'childDidGrow ' + this._super.grow();
         return result;
@@ -170,7 +170,7 @@ adds properties to the child.
 
 ```js
 var child;
-oop.derive(Parent, Child, {
+rel.derive(Parent, Child, {
     'invokePattern': 'async'
 });
 
