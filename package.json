@@ -1,14 +1,14 @@
 {
-    "name": "relations",
+    "name": "relate",
     "version": "0.0.1",
     "author": "Joubert Nel <joubert@joubster.com>",
     "description": "Minimal OOP relational functions",
     "main": "lib/main",
     "repository": {
         "type": "git",
-        "url": "git://github.com/joubertnel/relations.git"
+        "url": "git://github.com/joubertnel/relate.git"
     },
-    "keywords": [ "oop", "derive", "constructor", "slots", "methods" ],
+    "keywords": [ "oop", "derive", "constructor", "slots", "methods", "relate", "target", "action" ],
     "dependencies": {},
     "license": "MIT"
 }
