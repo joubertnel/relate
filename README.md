@@ -170,7 +170,7 @@ c = new C;
 actual = { didInvokeParentConstructor: c.didInvokeParentConstructor,
            didInvokeChildConstructor: c.didInvokeChildConstructor };
 
-expect(actual).to.deep.equal(actual);
+expect(actual).to.deep.equal(expected);
 ```
 
 adds methods to the child that can invoke methods on the parent (i.e. super functionality).

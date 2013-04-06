@@ -169,7 +169,7 @@ describe('main', function() {
             actual = { didInvokeParentConstructor: c.didInvokeParentConstructor,
                        didInvokeChildConstructor: c.didInvokeChildConstructor };
 
-            expect(actual).to.deep.equal(actual);
+            expect(actual).to.deep.equal(expected);
             
         });
 
