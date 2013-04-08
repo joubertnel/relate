@@ -151,46 +151,86 @@ describe('main', function() {
 
         it('enables invocation of the constructor of parent', function() {
             var expected = { didInvokeParentConstructor: true,
-                             didInvokeChildConstructor: true };
+                             didInvokeChildConstructor: true,
+                             cRef: 'C',
+                             c2Ref: 'C2',
+                             pRef: 'P',
+                             p2Ref: 'P2'};
             var actual;
-            var c;
-            var P = function() {
+            var c, c2;
+            var p, p2;
+            
+            var P = function(ref) {
+                this.ref = ref;
                 this.didInvokeParentConstructor = true;
             };
 
-            var C = function() {
-                this._super.constructor();
+            var C = function(ref) {
+                C._super.constructor.call(this, ref);
                 this.didInvokeChildConstructor = true;
             };
 
             rel.derive(P, C);
 
-            c = new C;
+            p = new P('P');
+            c = new C('C');
+            p2 = new P('P2');
+            c2 = new C('C2');
+                             
+            
             actual = { didInvokeParentConstructor: c.didInvokeParentConstructor,
-                       didInvokeChildConstructor: c.didInvokeChildConstructor };
+                       didInvokeChildConstructor: c.didInvokeChildConstructor,
+                       cRef: c.ref,
+                       c2Ref: c2.ref,
+                       pRef: p.ref,
+                       p2Ref: p2.ref };
 
             expect(actual).to.deep.equal(expected);
-            
         });
 
         it('adds methods to the child that can invoke methods on the parent (i.e. super functionality)', function() {
-            var child;
-            GrandParent.prototype.grow = function() { return 'grandParentDidGrow'; };
+            var c, p, g, c2;
+
+            var actual;
+            var expected = { child: 'Child',
+                             child2: 'Child2',
+                             parent: 'Parent',
+                             grandParent: 'GrandParent' };
+            
+            GrandParent.prototype.grow = function(ref) {
+                this.ref = ref;
+            };
 
             rel.derive(GrandParent, Parent, {
-                grow: function() {
-                    return 'parentDidGrow ' + this._super.grow();
+                grow: function(ref) {
+                    Parent._super.grow.call(this, ref);
                 }
             });
             
             rel.derive(Parent, Child, {
-                grow: function() {
-                    return 'childDidGrow ' + this._super.grow();
+                grow: function(ref) {
+                    Child._super.grow.call(this, ref);
                 }
             });
 
-            child = new Child;
-            expect(child.grow()).to.equal('childDidGrow parentDidGrow grandParentDidGrow');
+            c = new Child;
+            c.grow('Child');
+
+            p = new Parent;
+            p.grow('Parent');
+
+            c2 = new Child;
+            c2.grow('Child2');
+
+            g = new GrandParent;
+            g.grow('GrandParent');
+
+            actual = { child: c.ref,
+                       child2: c2.ref,
+                       parent: p.ref,
+                       grandParent: g.ref };
+
+            expect(actual).to.deep.equal(expected);
         });
 
 
