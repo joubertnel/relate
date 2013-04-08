@@ -189,27 +189,37 @@ describe('main', function() {
         });
 
         it('adds methods to the child that can invoke methods on the parent (i.e. super functionality)', function() {
-            var c, p, g, c2;
+            var c, p, g, c2, c3;
 
             var actual;
             var expected = { child: 'Child',
                              child2: 'Child2',
                              parent: 'Parent',
-                             grandParent: 'GrandParent' };
+                             grandParent: 'GrandParent',
+
+                             childDidInvokeOnGrandParent: true,
+                             childDidInvokeOnParent: true,
+                             childDidInvokeOnChild: true,
+
+                             child3DidInvokeOnGrandParent: undefined };
+
             
             GrandParent.prototype.grow = function(ref) {
                 this.ref = ref;
+                this.didInvokeOnGrandParent = true;
             };
 
             rel.derive(GrandParent, Parent, {
                 grow: function(ref) {
                     Parent._super.grow.call(this, ref);
+                    this.didInvokeOnParent = true;
                 }
             });
             
             rel.derive(Parent, Child, {
                 grow: function(ref) {
                     Child._super.grow.call(this, ref);
+                    this.didInvokeOnChild = true;
                 }
             });
 
@@ -225,10 +235,19 @@ describe('main', function() {
             g = new GrandParent;
             g.grow('GrandParent');
 
+            c3 = new Child;
+
             actual = { child: c.ref,
                        child2: c2.ref,
                        parent: p.ref,
-                       grandParent: g.ref };
+                       grandParent: g.ref,
+
+                       childDidInvokeOnGrandParent: c.didInvokeOnGrandParent,
+                       childDidInvokeOnParent: c.didInvokeOnParent,
+                       childDidInvokeOnChild: c.didInvokeOnChild,
+
+                       child3DidInvokeOnGrandParent: c3.didInvokeOnGrandParent
+                     };
 
             expect(actual).to.deep.equal(expected);
         });
